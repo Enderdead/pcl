@@ -58,6 +58,52 @@ namespace pcl
 
   namespace test
   {
+      template<typename V>
+      ::testing::AssertionResult EXPECT_VECTOR_CONTAINS_ALL(const char*  expr1, const char* expr2, std::vector<V> v, std::vector<V> elements) {
+          SCOPED_TRACE("EXPECT_VECTOR_CONTAINS_ALL failed");
+          for(const V& item : elements) {
+              if(std::find(v.cbegin(), v.cend(), item)==v.cend()) {
+
+                  std::ostringstream vec_rep;
+                  std::copy(v.cbegin(), v.cend()-1, std::ostream_iterator<V>(vec_rep, ", "));
+                  vec_rep<<v.back();
+
+                  std::ostringstream elements_rep;
+                  std::copy(elements.cbegin(), elements.cend()-1, std::ostream_iterator<V>(elements_rep, ", "));
+                  elements_rep << elements.back();
+
+                  return ::testing::AssertionFailure ()
+                    << "Vector       : "<< expr1<< std::endl
+                    << "contains     : " << vec_rep.str() << std::endl
+                    << "From         : " << expr2<< std::endl
+                    << "must contain : " << elements_rep.str() << std::endl;
+              }
+          }
+          return ::testing::AssertionSuccess ();
+      }
+
+      template<typename V>
+      ::testing::AssertionResult EXPECT_VECTOR_DOES_NOT_CONTAIN_ANY(const char*  expr1, const char*  expr2, std::vector<V> v, std::vector<V> elements) {
+          SCOPED_TRACE("EXPECT_VECTOR_DOES_NOT_CONTAIN_ANY failed");
+          for(const V& item : elements) {
+              if(std::find(v.cbegin(), v.cend(), item)!=v.cend()) {
+                  std::ostringstream vec_rep;
+                  std::copy(v.cbegin(), v.cend()-1, std::ostream_iterator<V>(vec_rep, ", "));
+                  vec_rep<<v.back();
+
+                  std::ostringstream elements_rep;
+                  std::copy(elements.cbegin(), elements.cend()-1, std::ostream_iterator<V>(elements_rep, ", "));
+                  elements_rep << elements.back();
+
+                  return ::testing::AssertionFailure ()
+                          << "Vector           : "<< expr1<< std::endl
+                          << "contains         : " << vec_rep.str() << std::endl
+                          << "From             : " << expr2<< std::endl
+                          << "must not contain : " << elements_rep.str() << std::endl;
+              }
+          }
+          return ::testing::AssertionSuccess ();
+      }
 
     template <typename V1, typename V2>
     void EXPECT_EQ_VECTORS (const V1& v1, const V2& v2)
