@@ -58,52 +58,6 @@ namespace pcl
 
   namespace test
   {
-      template<typename V>
-      ::testing::AssertionResult EXPECT_VECTOR_CONTAINS_ALL(const char*  expr1, const char* expr2, std::vector<V> v, std::vector<V> elements) {
-          SCOPED_TRACE("EXPECT_VECTOR_CONTAINS_ALL failed");
-          for(const V& item : elements) {
-              if(std::find(v.cbegin(), v.cend(), item)==v.cend()) {
-
-                  std::ostringstream vec_rep;
-                  std::copy(v.cbegin(), v.cend()-1, std::ostream_iterator<V>(vec_rep, ", "));
-                  vec_rep<<v.back();
-
-                  std::ostringstream elements_rep;
-                  std::copy(elements.cbegin(), elements.cend()-1, std::ostream_iterator<V>(elements_rep, ", "));
-                  elements_rep << elements.back();
-
-                  return ::testing::AssertionFailure ()
-                    << "Vector       : "<< expr1<< std::endl
-                    << "contains     : " << vec_rep.str() << std::endl
-                    << "From         : " << expr2<< std::endl
-                    << "must contain : " << elements_rep.str() << std::endl;
-              }
-          }
-          return ::testing::AssertionSuccess ();
-      }
-
-      template<typename V>
-      ::testing::AssertionResult EXPECT_VECTOR_DOES_NOT_CONTAIN_ANY(const char*  expr1, const char*  expr2, std::vector<V> v, std::vector<V> elements) {
-          SCOPED_TRACE("EXPECT_VECTOR_DOES_NOT_CONTAIN_ANY failed");
-          for(const V& item : elements) {
-              if(std::find(v.cbegin(), v.cend(), item)!=v.cend()) {
-                  std::ostringstream vec_rep;
-                  std::copy(v.cbegin(), v.cend()-1, std::ostream_iterator<V>(vec_rep, ", "));
-                  vec_rep<<v.back();
-
-                  std::ostringstream elements_rep;
-                  std::copy(elements.cbegin(), elements.cend()-1, std::ostream_iterator<V>(elements_rep, ", "));
-                  elements_rep << elements.back();
-
-                  return ::testing::AssertionFailure ()
-                          << "Vector           : "<< expr1<< std::endl
-                          << "contains         : " << vec_rep.str() << std::endl
-                          << "From             : " << expr2<< std::endl
-                          << "must not contain : " << elements_rep.str() << std::endl;
-              }
-          }
-          return ::testing::AssertionSuccess ();
-      }
 
     template <typename V1, typename V2>
     void EXPECT_EQ_VECTORS (const V1& v1, const V2& v2)
@@ -265,6 +219,52 @@ namespace pcl
         return ::testing::AssertionSuccess ();
       }
 
+
+        template<typename V>
+        ::testing::AssertionResult VectorContainsAll(const char*  expr1, const char* expr2, std::vector<V> elements, std::vector<V> v) {
+            for(const V& item : elements) {
+                if(std::find(v.cbegin(), v.cend(), item)==v.cend()) {
+
+                    std::ostringstream vec_rep;
+                    std::copy(v.cbegin(), v.cend()-1, std::ostream_iterator<V>(vec_rep, ", "));
+                    vec_rep<<v.back();
+
+                    std::ostringstream elements_rep;
+                    std::copy(elements.cbegin(), elements.cend()-1, std::ostream_iterator<V>(elements_rep, ", "));
+                    elements_rep << elements.back();
+
+                    return ::testing::AssertionFailure ()
+                            << "Vector       : "<< expr2 << std::endl
+                            << "contains     : " << vec_rep.str() << std::endl
+                            << "From         : " << expr1 << std::endl
+                            << "must contain : " << elements_rep.str() << std::endl;
+                }
+            }
+            return ::testing::AssertionSuccess ();
+        }
+
+        template<typename V>
+        ::testing::AssertionResult VectorDoesNotContain(const char*  expr1, const char*  expr2, std::vector<V> elements, std::vector<V> v) {
+            for(const V& item : elements) {
+                if(std::find(v.cbegin(), v.cend(), item)!=v.cend()) {
+                    std::ostringstream vec_rep;
+                    std::copy(v.cbegin(), v.cend()-1, std::ostream_iterator<V>(vec_rep, ", "));
+                    vec_rep<<v.back();
+
+                    std::ostringstream elements_rep;
+                    std::copy(elements.cbegin(), elements.cend()-1, std::ostream_iterator<V>(elements_rep, ", "));
+                    elements_rep << elements.back();
+
+                    return ::testing::AssertionFailure ()
+                            << "Vector           : "<< expr2 << std::endl
+                            << "contains         : " << vec_rep.str() << std::endl
+                            << "From             : " << expr1 << std::endl
+                            << "must not contain : " << elements_rep.str() << std::endl;
+                }
+            }
+            return ::testing::AssertionSuccess ();
+        }
+
     }
 
   }
@@ -358,3 +358,35 @@ namespace pcl
 #define EXPECT_METADATA_EQ(expected, actual)             \
   EXPECT_PRED_FORMAT2(::pcl::test::internal::MetaDataEQ, \
                       expected, actual)
+
+
+/// Expect that the vector contains all elements
+/// from the expected vector.
+#define EXPECT_VECTOR_CONTAINS_ALL(expected, actual)            \
+    EXPECT_PRED_FORMAT2(::pcl::test::internal::VectorContainsAll, \
+                        expected, actual)
+
+
+/// Expect that the vector does not contain any element
+/// from the expected vector.
+#define EXPECT_VECTOR_DOES_NOT_CONTAIN(expected, actual)           \
+    EXPECT_PRED_FORMAT2(::pcl::test::internal::VectorDoesNotContain, \
+                        expected, actual)
+
+
+
+/// Assert that the vector contains all elements
+/// from the expected vector.
+#define ASSERT_VECTOR_CONTAINS_ALL(expected, actual)            \
+    ASSERT_PRED_FORMAT2(::pcl::test::internal::VectorContainsAll, \
+                        expected, actual)
+
+
+/// Assert that the vector does not contain any element
+/// from the expected vector.
+#define ASSERT_VECTOR_DOES_NOT_CONTAIN(expected, actual)           \
+    ASSERT_PRED_FORMAT2(::pcl::test::internal::VectorDoesNotContain, \
+                        expected, actual)
+
+
+
